@@ -366,60 +366,24 @@ function isSessionValid() {
   }
 }
 
-// Schedule to run every hour - only activate in non-Vercel environments
-// Cron jobs don't work well in Vercel's serverless environment
-if (process.env.VERCEL_ENV === undefined) {
-  console.log('Starting cron job for hourly credit checks...');
-  cron.schedule('0 * * * *', async () => {
-    console.log('Running scheduled credit check...');
-    await scrapeCredits();
-  });
-}
-
-// Endpoint for Vercel cron job integration
-app.get('/api/cron-check', async (req, res) => {
-  // Optional: verify a secret to ensure only authorized cron jobs can trigger this
-  const secretHeader = req.headers['x-vercel-cron-secret'];
-  
-  if (process.env.CRON_SECRET && secretHeader !== process.env.CRON_SECRET) {
-    return res.status(401).json({ 
-      success: false, 
-      error: 'Unauthorized cron request' 
-    });
-  }
-  
-  console.log('Running cron job via API endpoint...');
-  try {
-    const creditValue = await scrapeCredits();
-    
-    if (creditValue !== null) {
-      return res.json({ 
-        success: true, 
-        credits: creditValue,
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Failed to retrieve credit value' 
-      });
-    }
-  } catch (error) {
-    console.error('Error in cron endpoint:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Internal server error' 
-    });
-  }
+// Schedule to run every hour
+console.log('Starting cron job for hourly credit checks...');
+cron.schedule('0 * * * *', async () => {
+  console.log('Running scheduled credit check...');
+  await scrapeCredits();
 });
 
-// Initial run on startup - only in non-Vercel environments
-// In Vercel, endpoints are only activated when called
-if (process.env.VERCEL_ENV === undefined) {
-  console.log('Server started, waiting for API requests at /credits');
-} else {
-  console.log('Server running in Vercel environment, endpoints ready');
-}
+// Initial run on startup
+console.log('Server started, initializing first credit check and waiting for API requests at /credits');
+(async () => {
+  if (isSessionValid()) {
+    console.log('Using existing session for initial check');
+    await scrapeCredits();
+  } else {
+    console.log('No valid session found, logging in...');
+    await login();
+  }
+})();
 
 // Function to send data to Slack webhook
 async function sendToSlackWebhook(creditValue) {
