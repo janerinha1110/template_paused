@@ -1,7 +1,0 @@
-node_modules/
-.env
-auth.json
-session-expiry.json
-latest-credit.json
-login-debug.png
-.DS_Store 

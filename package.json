@@ -1,11 +1,12 @@
 {
   "name": "aisensy-credits-scrapper",
   "version": "1.0.0",
-  "description": "Scrapes AISensy credits and sends them to Slack",
-  "main": "index.js",
+  "description": "Automation to scrape credits from Aisensy dashboard with API support",
+  "main": "api.js",
   "scripts": {
     "start": "node index.js",
-    "postinstall": "npx playwright install-deps && npx playwright install chromium"
+    "api": "node api.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "aisensy",
@@ -18,13 +19,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "axios": "^1.6.8",
-    "dotenv": "^16.4.6",
-    "express": "^4.19.1",
+    "axios": "^1.8.3",
+    "dotenv": "^16.4.1",
+    "express": "^4.21.2",
     "node-cron": "^3.0.3",
-    "playwright": "^1.43.1"
-  },
-  "engines": {
-    "node": ">=16"
+    "playwright": "^1.41.2"
   }
 }
