@@ -103,7 +103,13 @@ async function login() {
   console.log('Starting login process...');
   const browser = await chromium.launch({ 
     headless: true, 
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process'
+    ]
   });
   const context = await browser.newContext();
   const page = await context.newPage();
@@ -219,7 +225,13 @@ async function scrapeCredits(existingContext = null) {
       // Use existing session
       browser = await chromium.launch({ 
         headless: true, 
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--single-process'
+        ]
       });
       context = await browser.newContext({
         storageState: STORAGE_STATE_PATH
@@ -366,12 +378,47 @@ function isSessionValid() {
   }
 }
 
+// Add process error handlers to prevent crashes
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught exception:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled rejection at:', promise, 'reason:', reason);
+});
+
 // Schedule to run every 6 hours
 console.log('Starting cron job for credit checks every 6 hours...');
 cron.schedule('0 */6 * * *', async () => {
-  console.log('Running scheduled credit check...');
-  await scrapeCredits();
+  try {
+    console.log('Running scheduled credit check...');
+    await scrapeCredits().catch(err => {
+      console.error('Error in scheduled credit check:', err);
+    });
+  } catch (error) {
+    console.error('Cron job error:', error);
+  }
 });
+
+// Initial run on startup
+console.log('Server started, initializing first credit check and waiting for API requests at /credits');
+(async () => {
+  try {
+    if (isSessionValid()) {
+      console.log('Using existing session for initial check');
+      await scrapeCredits().catch(err => {
+        console.error('Error in initial credit check:', err);
+      });
+    } else {
+      console.log('No valid session found, logging in...');
+      await login().catch(err => {
+        console.error('Error during login:', err);
+      });
+    }
+  } catch (error) {
+    console.error('Error during startup sequence:', error);
+  }
+})();
 
 // Endpoint for Vercel cron job integration
 app.get('/api/cron-check', async (req, res) => {
