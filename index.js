@@ -387,9 +387,9 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled rejection at:', promise, 'reason:', reason);
 });
 
-// Schedule to run every 6 hours
-console.log('Starting cron job for credit checks every 6 hours...');
-cron.schedule('0 */6 * * *', async () => {
+// Schedule to run every 4 hours
+console.log('Starting cron job for credit checks every 4 hours...');
+cron.schedule('0 */4 * * *', async () => {
   try {
     console.log('Running scheduled credit check...');
     await scrapeCredits().catch(err => {
