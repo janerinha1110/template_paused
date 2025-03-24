@@ -387,9 +387,9 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled rejection at:', promise, 'reason:', reason);
 });
 
-// Schedule to run every 4 hours
-console.log('Starting cron job for credit checks every 4 hours...');
-cron.schedule('0 */4 * * *', async () => {
+// Schedule to run every hour
+console.log('Starting cron job for credit checks every hour...');
+cron.schedule('0 * * * *', async () => {
   try {
     console.log('Running scheduled credit check...');
     await scrapeCredits().catch(err => {
@@ -468,16 +468,21 @@ if (process.env.VERCEL_ENV === undefined) {
 // Function to send data to Slack webhook
 async function sendToSlackWebhook(creditValue) {
   try {
-    console.log(`Sending credit value ${creditValue} to Slack webhook`);
-    
-    const response = await axios.post(SLACK_WEBHOOK_URL, {
-      WCC: `Current credits: ${creditValue}`
-    });
-    
-    if (response.status === 200) {
-      console.log('Successfully sent to Slack webhook');
+    // Only send notification if credits are below 3000
+    if (creditValue < 3000) {
+      console.log(`Credits (${creditValue}) below threshold of 3000. Sending to Slack webhook.`);
+      
+      const response = await axios.post(SLACK_WEBHOOK_URL, {
+        WCC: `ALERT: Low credits! Current balance: ${creditValue}`
+      });
+      
+      if (response.status === 200) {
+        console.log('Successfully sent to Slack webhook');
+      } else {
+        console.error(`Failed to send to Slack webhook: Status ${response.status}`);
+      }
     } else {
-      console.error(`Failed to send to Slack webhook: Status ${response.status}`);
+      console.log(`Credits (${creditValue}) above threshold of 3000. No Slack notification needed.`);
     }
   } catch (error) {
     console.error('Error sending to Slack webhook:', error.message);
