@@ -6,7 +6,7 @@ Automatically scrapes credit information from AISensy dashboard and sends it to 
 
 - API endpoint `/credits` to trigger credit scraping on demand
 - Automatic credit checks every hour via cron job
-- Slack integration to send credit updates when balance falls below 3000
+- Slack integration to send credit updates when balance falls below 4500
 - Automatic re-login if session expires
 - Compatible with Vercel deployment
 
@@ -64,7 +64,7 @@ Automatically scrapes credit information from AISensy dashboard and sends it to 
 ## Usage
 
 - **API access**: Access `https://your-project.railway.app/credits` to trigger credit scraping on demand
-- **Automatic updates**: The app checks for credits hourly and posts alerts to Slack when credits fall below 3000
+- **Automatic updates**: The app checks for credits hourly and posts alerts to Slack when credits fall below 4500
 - **Manual check**: Railway's dashboard lets you view logs to see the latest credit values
 - **Cron job**: The `/api/cron-check` endpoint will be called automatically on your specified schedule
 - **Local development**: Run `npm start` to start the server locally

@@ -468,9 +468,9 @@ if (process.env.VERCEL_ENV === undefined) {
 // Function to send data to Slack webhook
 async function sendToSlackWebhook(creditValue) {
   try {
-    // Only send notification if credits are below 3000
-    if (creditValue < 3000) {
-      console.log(`Credits (${creditValue}) below threshold of 3000. Sending to Slack webhook.`);
+    // Only send notification if credits are below 4500
+    if (creditValue < 4500) {
+      console.log(`Credits (${creditValue}) below threshold of 4500. Sending to Slack webhook.`);
       
       const response = await axios.post(SLACK_WEBHOOK_URL, {
         WCC: `ALERT: Low credits! Current balance: ${creditValue}`
@@ -482,7 +482,7 @@ async function sendToSlackWebhook(creditValue) {
         console.error(`Failed to send to Slack webhook: Status ${response.status}`);
       }
     } else {
-      console.log(`Credits (${creditValue}) above threshold of 3000. No Slack notification needed.`);
+      console.log(`Credits (${creditValue}) above threshold of 4500. No Slack notification needed.`);
     }
   } catch (error) {
     console.error('Error sending to Slack webhook:', error.message);
